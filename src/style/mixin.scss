@@ -1,0 +1,12 @@
+
+@mixin button {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #fff;
+  background: #409eff;
+  cursor: pointer;
+  &:hover{
+    background: #66b1ff;
+  }
+}
