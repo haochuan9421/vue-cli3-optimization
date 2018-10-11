@@ -68,7 +68,7 @@ module.exports = {
             renderedRoute.html = renderedRoute.html.replace(
               /<script[^<]*chunk-[a-z0-9]{8}\.[a-z0-9]{8}.js[^<]*><\/script>/g,
               function (target) {
-                console.log(chalk.red('剔除的懒加载标签:', target))
+                console.log(chalk.bgRed('\n\n剔除的懒加载标签:'), chalk.magenta(target))
                 return ''
               }
             )
