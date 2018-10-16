@@ -17,17 +17,29 @@ const externals = {
 }
 // CDN外链，会插入到index.html中
 const cdn = {
-  css: [
-    'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
-  ],
-  js: [
-    'https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js',
-    'https://cdn.jsdelivr.net/npm/vue-router@3.0.1/dist/vue-router.min.js',
-    'https://cdn.jsdelivr.net/npm/vuex@3.0.1/dist/vuex.min.js',
-    'https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js',
-    'https://unpkg.com/element-ui/lib/index.js'
-  ]
+  // 开发环境
+  dev: {
+    css: [
+      'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
+    ],
+    js: []
+  },
+  // 生产环境
+  build: {
+    css: [
+      'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
+    ],
+    js: [
+      'https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js',
+      'https://cdn.jsdelivr.net/npm/vue-router@3.0.1/dist/vue-router.min.js',
+      'https://cdn.jsdelivr.net/npm/vuex@3.0.1/dist/vuex.min.js',
+      'https://cdn.jsdelivr.net/npm/axios@0.18.0/dist/axios.min.js',
+      'https://unpkg.com/element-ui/lib/index.js'
+    ]
+  }
 }
+// 是否使用预渲染
+const productionPrerender = true
 // 需要预渲染的路由
 const prerenderRoutes = ['/', '/contacts']
 // 是否使用gzip
@@ -42,10 +54,12 @@ module.exports = {
   productionSourceMap: false,
   configureWebpack: config => {
     const myConfig = {}
-    myConfig.externals = externals
     if (process.env.NODE_ENV === 'production') {
-      // 1. 使用预渲染，在仅加载html和css之后即可显示出基础的页面，提升用户体验，避免白屏
-      myConfig.plugins = [
+      // 1. 生产环境npm包转CDN
+      myConfig.externals = externals
+      // 2. 使用预渲染，在仅加载html和css之后即可显示出基础的页面，提升用户体验，避免白屏
+      myConfig.plugins = []
+      productionPrerender && myConfig.plugins.push(
         new PrerenderSPAPlugin({
           staticDir: path.resolve(__dirname, DIST_ROOT), // 作为express.static()中间件的路径
           outputDir: path.resolve(__dirname, DIST_ROOT + BASE_URL),
@@ -75,8 +89,8 @@ module.exports = {
             return renderedRoute
           }
         })
-      ]
-      // 2. 构建时开启gzip，降低服务器压缩对CPU资源的占用，服务器也要相应开启gzip
+      )
+      // 3. 构建时开启gzip，降低服务器压缩对CPU资源的占用，服务器也要相应开启gzip
       productionGzip && myConfig.plugins.push(
         new CompressionWebpackPlugin({
           test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'),
@@ -109,7 +123,12 @@ module.exports = {
     config
       .plugin('html')
       .tap(args => {
-        args[0].cdn = cdn
+        if (process.env.NODE_ENV === 'production') {
+          args[0].cdn = cdn.build
+        }
+        if (process.env.NODE_ENV === 'development') {
+          args[0].cdn = cdn.dev
+        }
         return args
       })
     /**
@@ -117,7 +136,7 @@ module.exports = {
      * sass-resources-loader 文档链接：https://github.com/shakacode/sass-resources-loader
      */
     const oneOfsMap = config.module.rule('scss').oneOfs.store
-    const sassResources = ['color.scss', 'mixin.scss', 'reset.scss'] // scss资源文件，可以在里面定义变量，mixin,全局样式等
+    const sassResources = ['color.scss', 'mixin.scss', 'common.scss'] // scss资源文件，可以在里面定义变量，mixin,全局混入样式等
     oneOfsMap.forEach(item => {
       item
         .use('sass-resources-loader')
