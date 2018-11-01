@@ -4,6 +4,8 @@
 
 > 注意！！！预渲染需要下载 `Chromium` ，而由于你懂的原因，谷歌的东西在国内无法下载，所以在根目录添加了`.npmrc`文件，来使用淘宝镜像下载。[参考链接](https://github.com/cnpm/cnpmjs.org/issues/1246)。如果你的终端可以翻到国外，直接忽略这一步,你也许会喜欢[小飞机](https://juejin.im/post/5b6852b1f265da0fb0189174)
 
+> 使用 iView 的同学需要注意！！！在非 `template/render` 模式下（例如使用 `CDN` 引用时），组件名要分隔。例如 `DatePicker` 必须要写成 `date-picker`。部分组件，需要加前缀 `i-`。具体参考 [iView 文档](https://www.iviewui.com/docs/guide/start#ZJSYGF)和[此 ISSUE](https://github.com/HaoChuan9421/vue-cli3-optimization/issues/4)
+
 ### 创建时的预设，详情参见`.vuerc`，[参考链接](https://cli.vuejs.org/zh/guide/creating-a-project.html#vue-create)
 
 ```json
